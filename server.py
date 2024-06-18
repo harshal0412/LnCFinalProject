@@ -1,32 +1,50 @@
 import socket
-import threading
+from db_operations import Database
+from client_handler import ClientHandler
 
 # Server configuration
 HOST = '127.0.0.1'  # Localhost
 PORT = 65432        # Port to listen on
 
-def handle_client(conn, addr):
-    print(f"Connected by {addr}")
-    with conn:
-        while True:
-            data = conn.recv(1024)
-            if not data:
-                break
-            print(f"Received from {addr}: {data.decode()}")
-            response = f"Echo: {data.decode()}"
-            conn.sendall(response.encode())
-    print(f"Connection with {addr} closed")
+# Database configuration
+db_config = {
+    'DRIVER': '{SQL Server}',
+    'SERVER': 'ITT-HARSHAL-JA',  # Replace with your SQL Server name
+    'DATABASE': 'LnC',
+    'Trusted_Connection': 'yes'
+}
 
-def main():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen()
-        print(f"Server listening on {HOST}:{PORT}")
+class Server:
+    def __init__(self, host, port, db_config):
+        self.host = host
+        self.port = port
+        self.db = Database(db_config)
 
-        while True:
-            conn, addr = s.accept()
-            client_thread = threading.Thread(target=handle_client, args=(conn, addr))
-            client_thread.start()
+    def start(self):
+        self.db.connect()
+        if not self.db.connection:
+            print("Failed to connect to the database")
+            return
+        
+        #TCP socket (socket.socket) for IPv4 (AF_INET) and TCP (SOCK_STREAM).
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((self.host, self.port))
+            s.listen()
+            print(f"Server listening on {self.host}:{self.port}")
+
+            #s.accept() blocking method that waits until a client connects to the server returns connection and address
+            while True:
+                conn, addr = s.accept()
+                client_handler = ClientHandler(conn, addr, self.db)
+                client_handler.start()
+
+    def stop(self):
+        self.db.close()
 
 if __name__ == "__main__":
-    main()
+    server = Server(HOST, PORT, db_config)
+    try:
+        server.start()
+    except KeyboardInterrupt:
+        server.stop()
+        print("Server stopped")

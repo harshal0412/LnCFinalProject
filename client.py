@@ -1,9 +1,8 @@
 import socket
 import threading
 
-# Server configuration
-HOST = '127.0.0.1'  # The server's hostname or IP address
-PORT = 65432        # The port used by the server
+HOST = '127.0.0.1'  
+PORT = 65432        
 
 def receive_messages(sock):
     while True:
@@ -22,14 +21,26 @@ def main():
         receive_thread.start()
 
         while True:
-            message = input("Enter message to send (type 'quit' to exit): ")
-            if message.lower() == 'quit':
+            command = input("Enter command (signup/login): ")
+            if command == 'signup':
+                username = input("Enter username: ")
+                password = input("Enter password: ")
+                role = input("Enter role (admin/chef/Employee): ")
+                message = f"{command},{username},{password},{role}"
+            elif command == 'login':
+                username = input("Enter username: ")
+                password = input("Enter password: ")
+                message = f"{command},{username},{password}"
+            else:
+                print("Invalid command")
+                continue
+
+            if command.lower() == 'quit':
                 print("Closing connection")
                 break
             
             s.sendall(message.encode())
-        
-        # Close the socket
+
         s.close()
 
 if __name__ == "__main__":
