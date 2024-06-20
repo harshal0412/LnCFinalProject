@@ -2,6 +2,9 @@
 
 import threading
 from menu_operations import MenuOperations
+from admin_operations import admin_menu_loop
+from employee_operations import employee_menu_loop
+from chef_operations import chef_menu_loop
 
 class ClientHandler(threading.Thread):
     def __init__(self, conn, addr, db):
@@ -21,6 +24,18 @@ class ClientHandler(threading.Thread):
             return f"Login successful, role: {role}"
         else:
             return "Login failed"
+
+    def handle_admin_menu(self):
+        admin_menu_loop(self.conn)  # Pass the socket to the admin menu loop function
+        return "Admin menu session ended"
+
+    def handle_employee_menu(self):
+        employee_menu_loop(self.conn)  # Pass the socket to the employee menu loop function
+        return "Employee menu session ended"
+
+    def handle_chef_menu(self):
+        chef_menu_loop(self.conn)  # Pass the socket to the chef menu loop function
+        return "Chef menu session ended"
 
     def run(self):
         print(f"Connected by {self.addr}")
@@ -60,22 +75,12 @@ class ClientHandler(threading.Thread):
                         response = self.menu_ops.delete_menu_item(item_id)
                     else:
                         response = "Invalid delete menu item parameters"
-                elif command == 'display_menu':
-                    response = self.menu_ops.display_menu()
-                elif command == 'get_menu_recommendations':
-                    response = self.menu_ops.get_menu_recommendations()
-                elif command == 'roll_out_menu':
-                    response = self.menu_ops.roll_out_menu()
-                elif command == 'generate_monthly_report':
-                    response = self.menu_ops.generate_monthly_report()
-                elif command == 'tomorrows_menu':
-                    response = self.menu_ops.tomorrows_menu()
-                elif command == 'give_feedback':
-                    if len(params) == 1:
-                        feedback = params[0]
-                        response = self.menu_ops.give_feedback(feedback)
-                    else:
-                        response = "Invalid feedback parameters"
+                elif command == 'admin_menu':
+                    response = self.handle_admin_menu()
+                elif command == 'employee_menu':
+                    response = self.handle_employee_menu()
+                elif command == 'chef_menu':
+                    response = self.handle_chef_menu()
                 else:
                     response = "Invalid command"
                 
