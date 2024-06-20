@@ -1,8 +1,11 @@
 # client.py
 
 import socket
-from menu import menu, admin_menu, chef_menu, employee_menu
+from menu import menu
 from authentication_service import signup, login
+from admin_operations import admin_menu_loop
+from chef_operations import chef_menu_loop
+from employee_operations import employee_menu_loop
 
 # Server configuration
 HOST = '127.0.0.1'
@@ -24,16 +27,15 @@ def main():
                 if role_response.startswith("Login successful, role:"):
                     role = role_response.split(':')[1].strip()
                     if role == 'admin':
-                        from admin_operations import admin_menu_loop
                         admin_menu_loop(s)
                     elif role == 'chef':
-                        from chef_operations import chef_menu_loop
                         chef_menu_loop(s)
                     elif role == 'employee':
-                        from employee_operations import employee_menu_loop
                         employee_menu_loop(s)
                     else:
                         print(f"Login successful, role: {role}")
+                else:
+                    print("Login failed")
             elif choice == '3':
                 print("Closing connection")
                 break
