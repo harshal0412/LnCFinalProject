@@ -1,15 +1,14 @@
 import socket
-from db_operations import Database
+from db_operations import DBOperations
 from client_handler import ClientHandler
 
-# Server configuration
-HOST = '127.0.0.1'  # Localhost
-PORT = 65432        # Port to listen on
+HOST = '127.0.0.1'  
+PORT = 65432        
 
 # Database configuration
 db_config = {
     'DRIVER': '{SQL Server}',
-    'SERVER': 'ITT-HARSHAL-JA',  # Replace with your SQL Server name
+    'SERVER': 'ITT-HARSHAL-JA',  
     'DATABASE': 'LnC',
     'Trusted_Connection': 'yes'
 }
@@ -18,21 +17,20 @@ class Server:
     def __init__(self, host, port, db_config):
         self.host = host
         self.port = port
-        self.db = Database(db_config)
+        self.db = DBOperations()
+        self.db.connect(db_config)
 
     def start(self):
-        self.db.connect()
         if not self.db.connection:
             print("Failed to connect to the database")
             return
         
-        #TCP socket (socket.socket) for IPv4 (AF_INET) and TCP (SOCK_STREAM).
+        # Create a TCP/IP socket
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((self.host, self.port))
             s.listen()
             print(f"Server listening on {self.host}:{self.port}")
 
-            #s.accept() blocking method that waits until a client connects to the server returns connection and address
             while True:
                 conn, addr = s.accept()
                 client_handler = ClientHandler(conn, addr, self.db)
@@ -48,4 +46,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         server.stop()
         print("Server stopped")
-
