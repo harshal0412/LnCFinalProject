@@ -42,3 +42,5 @@ class ClientHandler(threading.Thread):
                 self.conn.sendall(response.encode())
         
         print(f"Connection with {self.addr} closed")
+
+

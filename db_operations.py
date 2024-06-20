@@ -42,3 +42,5 @@ class Database:
             return "Login successful"
         else:
             return "Login failed"
+
+

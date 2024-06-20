@@ -10,3 +10,4 @@ text = "sambhar was good but idly was raw inside."
 score, magnitude = analyze_sentiment(text)
 print(f"Sentiment score: {score}, Sentiment magnitude: {magnitude}")
 
+
