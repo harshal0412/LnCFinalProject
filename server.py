@@ -2,13 +2,13 @@ import socket
 from db_operations import DBOperations
 from client_handler import ClientHandler
 
-HOST = '127.0.0.1'  
-PORT = 65432        
+HOST = '127.0.0.1'
+PORT = 65432
 
 # Database configuration
 db_config = {
     'DRIVER': '{SQL Server}',
-    'SERVER': 'ITT-HARSHAL-JA',  
+    'SERVER': 'ITT-HARSHAL-JA',
     'DATABASE': 'LnC',
     'Trusted_Connection': 'yes'
 }
