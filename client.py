@@ -1,7 +1,7 @@
 # client.py
 
 import socket
-from menu import menu
+from menu import menu, admin_menu, chef_menu, employee_menu
 from authentication_service import signup, login
 
 # Server configuration
@@ -26,6 +26,12 @@ def main():
                     if role == 'admin':
                         from admin_operations import admin_menu_loop
                         admin_menu_loop(s)
+                    elif role == 'chef':
+                        from chef_operations import chef_menu_loop
+                        chef_menu_loop(s)
+                    elif role == 'employee':
+                        from employee_operations import employee_menu_loop
+                        employee_menu_loop(s)
                     else:
                         print(f"Login successful, role: {role}")
             elif choice == '3':

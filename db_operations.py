@@ -66,11 +66,54 @@ class DBOperations:
             return "Menu item deleted successfully"
         else:
             return "Database connection not established"
-        
-    def get_menu_items(self):
+
+    def display_menu(self):
         if self.connection:
             cursor = self.connection.cursor()
-            cursor.execute("SELECT ID, name, price, availability FROM Menu")
-            return cursor.fetchall()
+            cursor.execute("SELECT * FROM Menu")
+            result = cursor.fetchall()
+            menu_items = [f"ID: {row.ID}, Name: {row.name}, Price: {row.price}, Availability: {row.availability}" for row in result]
+            return "\n".join(menu_items)
+        else:
+            return "Database connection not established"
+
+    def get_menu_recommendations(self):
+        # Placeholder for actual recommendation logic
+        if self.connection:
+            return "Menu recommendations generated successfully"
+        else:
+            return "Database connection not established"
+
+    def roll_out_menu(self):
+        # Placeholder for actual roll-out logic
+        if self.connection:
+            return "Menu rolled out successfully"
+        else:
+            return "Database connection not established"
+
+    def generate_monthly_report(self):
+        # Placeholder for actual report generation logic
+        if self.connection:
+            return "Monthly report generated successfully"
+        else:
+            return "Database connection not established"
+
+    def tomorrows_menu(self):
+        # Placeholder for fetching tomorrow's menu
+        if self.connection:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT * FROM Menu WHERE availability = 'yes'")
+            result = cursor.fetchall()
+            menu_items = [f"ID: {row.ID}, Name: {row.name}, Price: {row.price}" for row in result]
+            return "Tomorrow's Menu:\n" + "\n".join(menu_items)
+        else:
+            return "Database connection not established"
+
+    def give_feedback(self, feedback):
+        if self.connection:
+            cursor = self.connection.cursor()
+            cursor.execute("INSERT INTO Feedback (feedback) VALUES (?)", feedback)
+            self.connection.commit()
+            return "Feedback submitted successfully"
         else:
             return "Database connection not established"

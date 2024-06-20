@@ -22,14 +22,6 @@ class ClientHandler(threading.Thread):
         else:
             return "Login failed"
 
-    def display_menu(self):
-        menu_items = self.menu_ops.get_menu_items()
-        if menu_items:
-            menu_str = "\n".join(f"ID: {item[0]}, Name: {item[1]}, Price: {item[2]}, Availability: {item[3]}" for item in menu_items)
-            return menu_str
-        else:
-            return "No menu items found"
-
     def run(self):
         print(f"Connected by {self.addr}")
         with self.conn:
@@ -69,7 +61,21 @@ class ClientHandler(threading.Thread):
                     else:
                         response = "Invalid delete menu item parameters"
                 elif command == 'display_menu':
-                    response = self.display_menu()
+                    response = self.menu_ops.display_menu()
+                elif command == 'get_menu_recommendations':
+                    response = self.menu_ops.get_menu_recommendations()
+                elif command == 'roll_out_menu':
+                    response = self.menu_ops.roll_out_menu()
+                elif command == 'generate_monthly_report':
+                    response = self.menu_ops.generate_monthly_report()
+                elif command == 'tomorrows_menu':
+                    response = self.menu_ops.tomorrows_menu()
+                elif command == 'give_feedback':
+                    if len(params) == 1:
+                        feedback = params[0]
+                        response = self.menu_ops.give_feedback(feedback)
+                    else:
+                        response = "Invalid feedback parameters"
                 else:
                     response = "Invalid command"
                 

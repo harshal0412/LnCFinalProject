@@ -13,5 +13,20 @@ class MenuOperations:
     def delete_menu_item(self, item_id):
         return self.db.delete_menu_item(item_id)
 
-    def get_menu_items(self):
-        return self.db.get_menu_items()
+    def display_menu(self):
+        return self.db.display_menu()
+
+    def get_menu_recommendations(self):
+        return self.db.get_menu_recommendations()
+
+    def roll_out_menu(self):
+        return self.db.roll_out_menu()
+
+    def generate_monthly_report(self):
+        return self.db.generate_monthly_report()
+
+    def tomorrows_menu(self):
+        return self.db.tomorrows_menu()
+
+    def give_feedback(self, feedback):
+        return self.db.give_feedback(feedback)
