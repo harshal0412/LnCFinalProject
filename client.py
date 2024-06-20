@@ -1,46 +1,52 @@
 import socket
-import threading
 
-HOST = '127.0.0.1'  
-PORT = 65432        
+# Server configuration
+HOST = '127.0.0.1'  # The server's hostname or IP address
+PORT = 65432        # The port used by the server
 
-def receive_messages(sock):
-    while True:
-        data = sock.recv(1024)
-        if not data:
-            break
-        print(f"Received from server: {data.decode()}")
+def menu():
+    print("Menu:")
+    print("1. Signup")
+    print("2. Login")
+    print("3. Exit")
+
+def signup(sock):
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+    role = input("Enter role (admin/chef/employee): ")
+    message = f"signup,{username},{password},{role}"
+    sock.sendall(message.encode())
+    response = sock.recv(1024).decode()
+    print(response)
+
+def login(sock):
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+    message = f"login,{username},{password}"
+    sock.sendall(message.encode())
+    response = sock.recv(1024).decode()
+    print(response)
 
 def main():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
         print(f"Connected to server at {HOST}:{PORT}")
         
-        # Start a thread to listen for incoming messages
-        receive_thread = threading.Thread(target=receive_messages, args=(s,))
-        receive_thread.start()
-
         while True:
-            command = input("Enter command (signup/login): ")
-            if command == 'signup':
-                username = input("Enter username: ")
-                password = input("Enter password: ")
-                role = input("Enter role (admin/chef/Employee): ")
-                message = f"{command},{username},{password},{role}"
-            elif command == 'login':
-                username = input("Enter username: ")
-                password = input("Enter password: ")
-                message = f"{command},{username},{password}"
-            else:
-                print("Invalid command")
-                continue
-
-            if command.lower() == 'quit':
+            menu()
+            choice = input("Enter your choice (1/2/3): ")
+            
+            if choice == '1':
+                signup(s)
+            elif choice == '2':
+                login(s)
+            elif choice == '3':
                 print("Closing connection")
                 break
-            
-            s.sendall(message.encode())
-
+            else:
+                print("Invalid choice. Please enter 1, 2, or 3.")
+        
+        # Close the socket
         s.close()
 
 if __name__ == "__main__":
