@@ -12,3 +12,6 @@ class MenuOperations:
 
     def delete_menu_item(self, item_id):
         return self.db.delete_menu_item(item_id)
+
+    def get_menu_items(self):
+        return self.db.get_menu_items()

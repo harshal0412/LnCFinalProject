@@ -66,3 +66,11 @@ class DBOperations:
             return "Menu item deleted successfully"
         else:
             return "Database connection not established"
+        
+    def get_menu_items(self):
+        if self.connection:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT ID, name, price, availability FROM Menu")
+            return cursor.fetchall()
+        else:
+            return "Database connection not established"

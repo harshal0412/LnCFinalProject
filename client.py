@@ -1,3 +1,5 @@
+# client.py
+
 import socket
 
 # Server configuration
@@ -15,7 +17,8 @@ def admin_menu():
     print("1. Add Menu Item")
     print("2. Update Menu Item")
     print("3. Delete Menu Item")
-    print("4. Logout")
+    print("4. Display Menu")
+    print("5. Logout")
 
 def signup(sock):
     username = input("Enter username: ")
@@ -53,13 +56,17 @@ def update_menu_item(sock):
     response = sock.recv(1024).decode()
     print(response)
 
-
-
 def delete_menu_item(sock):
     item_id = input("Enter menu item ID to delete: ")
     message = f"delete_menu_item,{item_id}"
     sock.sendall(message.encode())
     response = sock.recv(1024).decode()
+    print(response)
+
+def display_menu(sock):
+    message = "display_menu,"
+    sock.sendall(message.encode())
+    response = sock.recv(4096).decode()  # Adjust buffer size if necessary
     print(response)
 
 def main():
@@ -80,7 +87,7 @@ def main():
                     if role == 'admin':
                         while True:
                             admin_menu()
-                            admin_choice = input("Enter your choice (1/2/3/4): ")
+                            admin_choice = input("Enter your choice (1/2/3/4/5): ")
                             if admin_choice == '1':
                                 add_menu_item(s)
                             elif admin_choice == '2':
@@ -88,9 +95,11 @@ def main():
                             elif admin_choice == '3':
                                 delete_menu_item(s)
                             elif admin_choice == '4':
+                                display_menu(s)
+                            elif admin_choice == '5':
                                 break
                             else:
-                                print("Invalid choice. Please enter 1, 2, 3, or 4.")
+                                print("Invalid choice. Please enter 1, 2, 3, 4, or 5.")
                     else:
                         print(f"Login successful, role: {role}")
             elif choice == '3':
