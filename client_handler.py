@@ -65,7 +65,16 @@ class ClientHandler(threading.Thread):
                 elif command == 'get_menu_recommendations':
                     response = self.menu_ops.get_menu_recommendations()
                 elif command == 'roll_out_menu':
-                    response = self.menu_ops.roll_out_menu()
+                    if len(params) == 3:
+                        try:
+                            n_breakfast = int(params[0])
+                            n_lunch = int(params[1])
+                            n_dinner = int(params[2])
+                            response = self.menu_ops.roll_out_menu(n_breakfast, n_lunch, n_dinner)
+                        except ValueError:
+                            response = "Invalid roll out menu parameters: non-integer value"
+                    else:
+                        response = "Invalid roll out menu parameters"
                 elif command == 'generate_monthly_report':
                     response = self.menu_ops.generate_monthly_report()
                 elif command == 'tomorrows_menu':

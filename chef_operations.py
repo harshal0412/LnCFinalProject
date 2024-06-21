@@ -9,10 +9,16 @@ def get_menu_recommendations(sock):
     print(response)
 
 def roll_out_menu(sock):
-    message = "roll_out_menu,"
-    sock.sendall(message.encode())
-    response = sock.recv(1024).decode()
-    print(response)
+    try:
+        n_breakfast = int(input("Enter the number of breakfast recommendations: "))
+        n_lunch = int(input("Enter the number of lunch recommendations: "))
+        n_dinner = int(input("Enter the number of dinner recommendations: "))
+        message = f"roll_out_menu,{n_breakfast},{n_lunch},{n_dinner}"
+        sock.sendall(message.encode())
+        response = sock.recv(1024).decode()
+        print(response)
+    except ValueError:
+        print("Invalid input: please enter integer values.")
 
 def generate_monthly_report(sock):
     message = "generate_monthly_report,"

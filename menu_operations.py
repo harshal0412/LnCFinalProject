@@ -19,8 +19,8 @@ class MenuOperations:
     def get_menu_recommendations(self):
         return self.db.get_menu_recommendations()
 
-    def roll_out_menu(self):
-        return self.db.roll_out_menu()
+    def roll_out_menu(self, n_breakfast, n_lunch, n_dinner):
+        return self.db.roll_out_menu(n_breakfast, n_lunch, n_dinner)
 
     def generate_monthly_report(self):
         return self.db.generate_monthly_report()

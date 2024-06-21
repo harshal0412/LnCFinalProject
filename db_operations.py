@@ -84,12 +84,44 @@ class DBOperations:
         else:
             return "Database connection not established"
 
-    def roll_out_menu(self):
-        # Placeholder for actual roll-out logic
-        if self.connection:
-            return "Menu rolled out successfully"
-        else:
+    def roll_out_menu(self, n_breakfast, n_lunch, n_dinner):
+        if not self.connection:
             return "Database connection not established"
+
+        try:
+            cursor = self.connection.cursor()
+
+            # Roll out breakfast menu items
+            self._roll_out_meal(cursor, n_breakfast, 'Breakfast')
+
+            # Roll out lunch menu items
+            self._roll_out_meal(cursor, n_lunch, 'Lunch')
+
+            # Roll out dinner menu items
+            self._roll_out_meal(cursor, n_dinner, 'Dinner')
+
+            self.connection.commit()
+            return "Menu rolled out successfully"
+
+        except pyodbc.Error as e:
+            print(f"Error in roll_out_menu: {str(e)}")
+            return "Error rolling out menu"
+
+        finally:
+            cursor.close()
+
+    def _roll_out_meal(self, cursor, count, meal_type):
+        if count > 0:
+            cursor.execute(f"SELECT TOP {count} menu_id FROM ChefRecommandedmenu WHERE type = ?", meal_type)
+            menu_ids = [row.menu_id for row in cursor.fetchall()]
+
+            if menu_ids:
+                placeholders = ",".join("?" * len(menu_ids))
+                cursor.execute(f"SELECT ID, name FROM Menu WHERE ID IN ({placeholders})", *menu_ids)
+
+                for row in cursor.fetchall():
+                    cursor.execute("INSERT INTO CurrentMenu (meal_type, menu_id, item_name) VALUES (?, ?, ?)",
+                                meal_type.capitalize(), row.ID, row.name)
 
     def generate_monthly_report(self):
         # Placeholder for actual report generation logic
