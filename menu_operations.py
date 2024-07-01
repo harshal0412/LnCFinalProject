@@ -30,3 +30,6 @@ class MenuOperations:
 
     def give_feedback(self, feedback):
         return self.db.give_feedback(feedback)
+
+    def get_item_detail_by_id(self, ids):
+        return self.db.get_item_detail_by_id(ids)

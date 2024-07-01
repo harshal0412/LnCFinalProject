@@ -17,17 +17,22 @@ class Server:
     def __init__(self, host, port, db_config):
         self.host = host
         self.port = port
-        self.db = DBOperations()
-        self.db.connect(db_config)
+        self.db = DBOperations(db_config)  # Pass db_config here
+        self.db.connect()
 
     def start(self):
         if not self.db.connection:
             print("Failed to connect to the database")
             return
         
-        # Create a TCP/IP socket
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((self.host, self.port))
+            try:
+                s.bind((self.host, self.port))
+            except PermissionError as e:
+                print(f"PermissionError: {e}")
+                print("Check if the port is already in use or if you have the necessary permissions.")
+                return
+            
             s.listen()
             print(f"Server listening on {self.host}:{self.port}")
 

@@ -1,12 +1,16 @@
+# db_operations.py
+from datetime import datetime,timedelta
+from sentiment import SentimentAnalyzer
 import pyodbc
 
 class DBOperations:
-    def __init__(self):
+    def __init__(self, db_config):
         self.connection = None
+        self.db_config = db_config
 
-    def connect(self, db_config):
+    def connect(self):
         try:
-            conn_str = ';'.join([f"{key}={value}" for key, value in db_config.items()])
+            conn_str = ';'.join([f"{key}={value}" for key, value in self.db_config.items()])
             self.connection = pyodbc.connect(conn_str)
             print("Database connection successful")
         except pyodbc.Error as e:
@@ -18,6 +22,28 @@ class DBOperations:
         if self.connection:
             self.connection.close()
             print("Database connection closed")
+
+    def fetch_all(self, query):
+        cursor = self.connection.cursor()
+        cursor.execute(f"""
+        SELECT DISTINCT f.menu_id, f.rating, f.sentiment_score
+        FROM Feedback f
+        LEFT JOIN Menu m ON f.menu_id = m.ID where m.type = '{query}';""")
+        result = cursor.fetchall()
+        print(result)
+        return result
+
+    def get_yesterdays_items(self, item_category):
+        cursor = self.connection.cursor()
+        yesterday = str(datetime.now() - timedelta(1))
+        cursor.execute(f"""
+        SELECT DISTINCT c.menu_id
+        FROM Chefmenutable c
+        left join menu m on m.id = c.menu_id
+        where c.sentdate = '{yesterday}' and m.type = '{item_category}';""")
+        data=cursor.fetchall()
+        print(data)
+        return data
 
     def signup(self, username, password, role):
         if self.connection:
@@ -78,11 +104,19 @@ class DBOperations:
             return "Database connection not established"
 
     def get_menu_recommendations(self):
-        # Placeholder for actual recommendation logic
-        if self.connection:
-            return "Menu recommendations generated successfully"
-        else:
+        from recommendation_engine import RecommendationSystem
+        
+        if not self.connection:
             return "Database connection not established"
+        
+        rec_system = RecommendationSystem(self.db_config)
+        recommendations = rec_system.get_recommendations(5)  
+        
+        breakfast = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['breakfast']])
+        lunch = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['lunch']])
+        dinner = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['dinner']])
+        
+        return f"Breakfast Recommendations:\n{breakfast}\n\nLunch Recommendations:\n{lunch}\n\nDinner Recommendations:\n{dinner}"
 
     def roll_out_menu(self, n_breakfast, n_lunch, n_dinner):
         if not self.connection:
@@ -112,8 +146,8 @@ class DBOperations:
 
     def _roll_out_meal(self, cursor, count, meal_type):
         if count > 0:
-            cursor.execute(f"SELECT TOP {count} menu_id FROM ChefRecommandedmenu WHERE type = ?", meal_type)
-            menu_ids = [row.menu_id for row in cursor.fetchall()]
+            cursor.execute(f"SELECT TOP {count} ID FROM Menu WHERE availability = 1")
+            menu_ids = [row.ID for row in cursor.fetchall()]
 
             if menu_ids:
                 placeholders = ",".join("?" * len(menu_ids))
@@ -134,18 +168,46 @@ class DBOperations:
         # Placeholder for fetching tomorrow's menu
         if self.connection:
             cursor = self.connection.cursor()
-            cursor.execute("SELECT * FROM Menu WHERE availability = 'yes'")
+            cursor.execute("SELECT * FROM Menu WHERE availability = 1")
             result = cursor.fetchall()
             menu_items = [f"ID: {row.ID}, Name: {row.name}, Price: {row.price}" for row in result]
             return "Tomorrow's Menu:\n" + "\n".join(menu_items)
         else:
             return "Database connection not established"
 
-    def give_feedback(self, feedback):
+    def give_feedback(self, menu_id, emp_id, comment, rating, date):
         if self.connection:
+            sentiment_score = SentimentAnalyzer.analyze_sentiment(comment)
+            
             cursor = self.connection.cursor()
-            cursor.execute("INSERT INTO Feedback (feedback) VALUES (?)", feedback)
+            cursor.execute("INSERT INTO Feedback (menu_id, Emp_id, comment, rating, date, sentiment_score) VALUES (?, ?, ?, ?, ?, ?)",
+                           menu_id, emp_id, comment, rating, date, sentiment_score)
             self.connection.commit()
             return "Feedback submitted successfully"
         else:
             return "Database connection not established"
+
+    def get_item_detail_by_id(self, ids):
+        if not self.connection:
+            return "Database connection not established"
+        
+        cursor = self.connection.cursor()
+        print(ids)
+        cursor.execute(f"""
+        SELECT ID, name, price, availability, type
+        FROM Menu
+        WHERE ID IN ({ids})
+        """)
+        data = cursor.fetchall()
+
+        item_details = []
+        for row in data:
+            item_details.append({
+                'ID': row.ID,
+                'name': row.name,
+                'price': row.price,
+                'availability': row.availability,
+                'type': row.type
+            })
+        
+        return item_details

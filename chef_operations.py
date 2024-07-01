@@ -1,5 +1,4 @@
-# chef_operations.py
-
+#chef_operations.py
 from menu import chef_menu
 
 def get_menu_recommendations(sock):

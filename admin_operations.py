@@ -5,7 +5,7 @@ from menu import admin_menu
 def add_menu_item(sock):
     name = input("Enter menu item name: ")
     price = input("Enter menu item price: ")
-    availability = input("Is the item available (yes/no): ")
+    availability = input("Is the item available (True/False): ")
     message = f"add_menu_item,{name},{price},{availability}"
     sock.sendall(message.encode())
     response = sock.recv(1024).decode()
@@ -14,7 +14,7 @@ def add_menu_item(sock):
 def update_menu_item(sock):
     item_id = input("Enter menu item ID to update: ")
     price = input("Enter new menu item price: ")
-    availability = input("Is the item available (yes/no): ")
+    availability = input("Is the item available (True/False): ")
     message = f"update_menu_item,{item_id},{price},{availability}"
     sock.sendall(message.encode())
     response = sock.recv(1024).decode()
