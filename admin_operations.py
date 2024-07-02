@@ -30,7 +30,7 @@ def delete_menu_item(sock):
 def display_menu(sock):
     message = "display_menu,"
     sock.sendall(message.encode())
-    response = sock.recv(4096).decode()  # Adjust buffer size if necessary
+    response = sock.recv(4096).decode() 
     print(response)
 
 def admin_menu_loop(sock):

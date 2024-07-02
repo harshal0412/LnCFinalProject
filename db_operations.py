@@ -165,13 +165,22 @@ class DBOperations:
             return "Database connection not established"
 
     def tomorrows_menu(self):
-        # Placeholder for fetching tomorrow's menu
         if self.connection:
             cursor = self.connection.cursor()
-            cursor.execute("SELECT * FROM Menu WHERE availability = 1")
+            print(str(datetime.now().date()))
+            today_date = str(datetime.now().date())
+            
+            query = """
+            SELECT m.ID, m.name, m.price, m.type
+            FROM ChefMenuTable cmt
+            JOIN Menu m ON cmt.menu_id = m.ID
+            WHERE cmt.sentdate = ?
+            """
+            cursor.execute(query, (today_date,))
             result = cursor.fetchall()
-            menu_items = [f"ID: {row.ID}, Name: {row.name}, Price: {row.price}" for row in result]
-            return "Tomorrow's Menu:\n" + "\n".join(menu_items)
+            
+            menu_items = [f"ID: {row.ID}, Name: {row.name}, Price: {row.price}, Type: {row.type}" for row in result]
+            return "Today's Menu:\n" + "\n".join(menu_items)
         else:
             return "Database connection not established"
 
