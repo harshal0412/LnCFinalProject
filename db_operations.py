@@ -118,21 +118,22 @@ class DBOperations:
         
         return f"Breakfast Recommendations:\n{breakfast}\n\nLunch Recommendations:\n{lunch}\n\nDinner Recommendations:\n{dinner}"
 
-    def roll_out_menu(self, n_breakfast, n_lunch, n_dinner):
+    def roll_out_menu(self, breakfast_ids, lunch_ids, dinner_ids):
         if not self.connection:
             return "Database connection not established"
-
+        from recommendation_engine import RecommendationSystem
+        
         try:
             cursor = self.connection.cursor()
 
             # Roll out breakfast menu items
-            self._roll_out_meal(cursor, n_breakfast, 'Breakfast')
+            self._roll_out_meal(cursor, breakfast_ids, 'Breakfast')
 
             # Roll out lunch menu items
-            self._roll_out_meal(cursor, n_lunch, 'Lunch')
+            self._roll_out_meal(cursor, lunch_ids, 'Lunch')
 
             # Roll out dinner menu items
-            self._roll_out_meal(cursor, n_dinner, 'Dinner')
+            self._roll_out_meal(cursor, dinner_ids, 'Dinner')
 
             self.connection.commit()
             return "Menu rolled out successfully"
@@ -144,18 +145,17 @@ class DBOperations:
         finally:
             cursor.close()
 
-    def _roll_out_meal(self, cursor, count, meal_type):
-        if count > 0:
-            cursor.execute(f"SELECT TOP {count} ID FROM Menu WHERE availability = 1")
-            menu_ids = [row.ID for row in cursor.fetchall()]
+    def _roll_out_meal(self, cursor, menu_ids, meal_type):
+        if menu_ids:
+            placeholders = ",".join("?" * len(menu_ids))
+            cursor.execute(f"SELECT ID, name FROM Menu WHERE ID IN ({placeholders})", *menu_ids)
+            result = cursor.fetchall()
+            print(result)
+            test_date = str(datetime.now().date())
+            for row in result:
+                cursor.execute(f"""INSERT INTO Chefmenutable (menu_id, sentdate) VALUES ({row[0]}, '{test_date}')""")
 
-            if menu_ids:
-                placeholders = ",".join("?" * len(menu_ids))
-                cursor.execute(f"SELECT ID, name FROM Menu WHERE ID IN ({placeholders})", *menu_ids)
 
-                for row in cursor.fetchall():
-                    cursor.execute("INSERT INTO CurrentMenu (meal_type, menu_id, item_name) VALUES (?, ?, ?)",
-                                meal_type.capitalize(), row.ID, row.name)
 
     def generate_monthly_report(self):
         # Placeholder for actual report generation logic
