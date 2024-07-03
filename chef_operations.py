@@ -1,11 +1,31 @@
+# chef_operations.py
 from menu import chef_menu
+
+def send_message(sock, message):
+    sock.sendall(message.encode())
+
+def receive_response(sock, buffer_size=4096):
+    try:
+        response = sock.recv(buffer_size).decode()
+        return response
+    except Exception as e:
+        print(f"Error while receiving response: {e}")
+        return ""
 
 def get_menu_recommendations(sock):
     message = "get_menu_recommendations,"
-    sock.sendall(message.encode())
-    response = sock.recv(4096).decode()  # Increased buffer size for larger messages
+    send_message(sock, message)
+    response = receive_response(sock)
     print(response)
-    return response
+
+def validate_ids(ids_str):
+    try:
+        ids = [int(id.strip()) for id in ids_str.split(',') if id.strip().isdigit()]
+        if not ids:
+            raise ValueError("Empty list of IDs")
+        return ids, None
+    except ValueError as e:
+        return None, str(e)
 
 def roll_out_menu(sock):
     try:
@@ -17,47 +37,19 @@ def roll_out_menu(sock):
         lunch_ids_str = input("Enter the menu IDs for lunch (comma-separated): ").strip()
         dinner_ids_str = input("Enter the menu IDs for dinner (comma-separated): ").strip()
         
-        if not breakfast_ids_str:
-            print("Invalid input: Breakfast IDs cannot be empty.")
-            return
-        if not lunch_ids_str:
-            print("Invalid input: Lunch IDs cannot be empty.")
-            return
-        if not dinner_ids_str:
-            print("Invalid input: Dinner IDs cannot be empty.")
-            return
-        
-        def validate_ids(ids_str):
-            try:
-                print(f"Validating IDs: '{ids_str}'")
-                ids = [int(id.strip()) for id in ids_str.split(',')]
-                if not ids:
-                    raise ValueError("Empty list of IDs")
-                print(f"Validated IDs: {ids}")
-                return ids, None
-            except ValueError as e:
-                print(f"Error in validation: {e}")
-                return None, "Invalid input: Please enter a comma-separated list of integers."
-        
-        breakfast_ids, error = validate_ids(breakfast_ids_str)
-        if error:
-            print(error)
-            return
-        
-        lunch_ids, error = validate_ids(lunch_ids_str)
-        if error:
-            print(error)
-            return
-        
-        dinner_ids, error = validate_ids(dinner_ids_str)
-        if error:
-            print(error)
-            return
+        for ids_str, meal_type in [(breakfast_ids_str, "breakfast"), (lunch_ids_str, "lunch"), (dinner_ids_str, "dinner")]:
+            if not ids_str:
+                print(f"Invalid input: {meal_type.capitalize()} IDs cannot be empty.")
+                return
+            
+            ids, error = validate_ids(ids_str)
+            if error:
+                print(error)
+                return
         
         message = f"roll_out_menu,{','.join(map(str, breakfast_ids))};{','.join(map(str, lunch_ids))};{','.join(map(str, dinner_ids))}"
-        print(f"Sending message: {message}")
-        sock.sendall(message.encode())
-        response = sock.recv(4096).decode()  # Increased buffer size for larger messages
+        send_message(sock, message)
+        response = receive_response(sock)
         print(f"Server response: {response}")
         
     except Exception as e:
@@ -65,8 +57,8 @@ def roll_out_menu(sock):
 
 def generate_monthly_report(sock):
     message = "generate_monthly_report,"
-    sock.sendall(message.encode())
-    response = sock.recv(4096).decode()  # Increased buffer size for larger messages
+    send_message(sock, message)
+    response = receive_response(sock)
     print(response)
 
 def chef_menu_loop(sock):

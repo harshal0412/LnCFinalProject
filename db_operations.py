@@ -1,12 +1,14 @@
-# db_operations.py
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from sentiment import SentimentAnalyzer
 import pyodbc
+from recommendation_engine import RecommendationSystem  # Remove this import
+from menu_operations import MenuOperations
 
 class DBOperations:
     def __init__(self, db_config):
         self.connection = None
         self.db_config = db_config
+        self.rec_system = RecommendationSystem(db_config)
 
     def connect(self):
         try:
@@ -104,8 +106,6 @@ class DBOperations:
             return "Database connection not established"
 
     def get_menu_recommendations(self):
-        from recommendation_engine import RecommendationSystem
-        
         if not self.connection:
             return "Database connection not established"
         
@@ -121,7 +121,6 @@ class DBOperations:
     def roll_out_menu(self, breakfast_ids, lunch_ids, dinner_ids):
         if not self.connection:
             return "Database connection not established"
-        from recommendation_engine import RecommendationSystem
         
         try:
             cursor = self.connection.cursor()
@@ -154,8 +153,6 @@ class DBOperations:
             test_date = str(datetime.now().date())
             for row in result:
                 cursor.execute(f"""INSERT INTO Chefmenutable (menu_id, sentdate) VALUES ({row[0]}, '{test_date}')""")
-
-
 
     def generate_monthly_report(self):
         # Placeholder for actual report generation logic

@@ -1,18 +1,28 @@
 # employee_operations.py
-
 from menu import employee_menu
+
+def send_message(sock, message):
+    sock.sendall(message.encode())
+
+def receive_response(sock, buffer_size=1024):
+    try:
+        response = sock.recv(buffer_size).decode()
+        return response
+    except Exception as e:
+        print(f"Error while receiving response: {e}")
+        return ""
 
 def tomorrows_menu(sock):
     message = "tomorrows_menu,"
-    sock.sendall(message.encode())
-    response = sock.recv(1024).decode()
+    send_message(sock, message)
+    response = receive_response(sock)
     print(response)
 
 def give_feedback(sock):
     feedback = input("Enter your feedback: ")
     message = f"give_feedback,{feedback}"
-    sock.sendall(message.encode())
-    response = sock.recv(1024).decode()
+    send_message(sock, message)
+    response = receive_response(sock)
     print(response)
 
 def employee_menu_loop(sock):
