@@ -1,14 +1,12 @@
 from datetime import datetime, timedelta
 from sentiment import SentimentAnalyzer
 import pyodbc
-from recommendation_engine import RecommendationSystem  # Remove this import
-from menu_operations import MenuOperations
+from recommendation_engine import RecommendationSystem
 
 class DBOperations:
     def __init__(self, db_config):
         self.connection = None
         self.db_config = db_config
-        self.rec_system = RecommendationSystem(db_config)
 
     def connect(self):
         try:
@@ -109,8 +107,8 @@ class DBOperations:
         if not self.connection:
             return "Database connection not established"
         
-        rec_system = RecommendationSystem(self.db_config)
-        recommendations = rec_system.get_recommendations(5)  
+        rec_system = RecommendationSystem(self)
+        recommendations = rec_system.get_recommendations(self, 5)  
         
         breakfast = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['breakfast']])
         lunch = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['lunch']])

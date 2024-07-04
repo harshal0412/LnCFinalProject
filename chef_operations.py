@@ -37,20 +37,47 @@ def roll_out_menu(sock):
         lunch_ids_str = input("Enter the menu IDs for lunch (comma-separated): ").strip()
         dinner_ids_str = input("Enter the menu IDs for dinner (comma-separated): ").strip()
         
-        for ids_str, meal_type in [(breakfast_ids_str, "breakfast"), (lunch_ids_str, "lunch"), (dinner_ids_str, "dinner")]:
-            if not ids_str:
-                print(f"Invalid input: {meal_type.capitalize()} IDs cannot be empty.")
-                return
-            
-            ids, error = validate_ids(ids_str)
-            if error:
-                print(error)
-                return
+        # Validate and store breakfast IDs
+        ids_str, meal_type = breakfast_ids_str, "breakfast"
+        if not ids_str:
+            print(f"Invalid input: {meal_type.capitalize()} IDs cannot be empty.")
+            return
+        
+        breakfast_ids, error = validate_ids(ids_str)
+        if error:
+            print(error)
+            return
+
+        # Validate and store lunch IDs
+        ids_str, meal_type = lunch_ids_str, "lunch"
+        if not ids_str:
+            print(f"Invalid input: {meal_type.capitalize()} IDs cannot be empty.")
+            return
+        
+        lunch_ids, error = validate_ids(ids_str)
+        if error:
+            print(error)
+            return
+
+        # Validate and store dinner IDs
+        ids_str, meal_type = dinner_ids_str, "dinner"
+        if not ids_str:
+            print(f"Invalid input: {meal_type.capitalize()} IDs cannot be empty.")
+            return
+        
+        dinner_ids, error = validate_ids(ids_str)
+        if error:
+            print(error)
+            return
         
         message = f"roll_out_menu,{','.join(map(str, breakfast_ids))};{','.join(map(str, lunch_ids))};{','.join(map(str, dinner_ids))}"
         send_message(sock, message)
         response = receive_response(sock)
         print(f"Server response: {response}")
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
         
     except Exception as e:
         print(f"An error occurred: {e}")
