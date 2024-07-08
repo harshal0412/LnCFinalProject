@@ -27,9 +27,12 @@ class MenuOperations:
 
     def tomorrows_menu(self):
         return self.db.tomorrows_menu()
+   
+    def employee_voting(self,item_id):
+        return self.db.employee_voting(item_id)
 
-    def give_feedback(self, feedback):
-        return self.db.give_feedback(feedback)
+    def give_feedback(self, menu_id, feedback, rating):
+        return self.db.give_feedback(menu_id, feedback, rating)
 
     def get_item_detail_by_id(self, ids):
         return self.db.get_item_detail_by_id(ids)

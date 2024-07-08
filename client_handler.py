@@ -24,7 +24,7 @@ class ClientHandler(threading.Thread):
         command, *params = request.split(',')
         print(f"Received command: {command}")
         print(f"Received parameters: {params}")
-        
+
         commands = {
             'signup': self.handle_signup,
             'login': self.handle_login,
@@ -36,7 +36,9 @@ class ClientHandler(threading.Thread):
             'roll_out_menu': self.handle_roll_out_menu,
             'generate_monthly_report': self.handle_generate_monthly_report,
             'tomorrows_menu': self.handle_tomorrows_menu,
-            'give_feedback': self.handle_give_feedback
+            'employee_voting': self.handle_employee_voting,
+            'give_feedback': self.handle_give_feedback,
+            'increment_votes': self.handle_increment_votes
         }
 
         handler = commands.get(command, self.handle_invalid_command)
@@ -103,11 +105,24 @@ class ClientHandler(threading.Thread):
     def handle_tomorrows_menu(self, _):
         return self.menu_ops.tomorrows_menu()
 
-    def handle_give_feedback(self, params):
+    def handle_employee_voting(self, params):
         if len(params) == 1:
-            feedback = params[0]
-            return self.menu_ops.give_feedback(feedback)
+            item_id = int(params[0])
+            return self.menu_ops.employee_voting(item_id)
+        return "Invalid employee voting parameters"
+
+    def handle_give_feedback(self, params):
+        if len(params) == 3:
+            menu_id = params[0]
+            feedback = params[1]
+            rating = params[2]
+            return self.menu_ops.give_feedback(menu_id,feedback, rating)
         return "Invalid feedback parameters"
+
+    def handle_increment_votes(self, params):
+        menu_ids = [int(id_str) for id_str in params[0].split(",")]
+        response = self.db.increment_votes(menu_ids)
+        return response
 
     def handle_invalid_command(self, _):
         return "Invalid command"

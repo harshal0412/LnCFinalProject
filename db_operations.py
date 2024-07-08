@@ -110,52 +110,49 @@ class DBOperations:
         rec_system = RecommendationSystem(self)
         recommendations = rec_system.get_recommendations(self, 5)  
         
-        breakfast = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['breakfast']])
-        lunch = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['lunch']])
-        dinner = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['dinner']])
+        breakfast = "\n".join([f"{item['ID']}: {item['name']} - {item['score']}" for item in recommendations["Breakfast"]])
+        lunch = "\n".join([f"{item['ID']}: {item['name']} - {item['score']}" for item in recommendations["Lunch"]])
+        dinner = "\n".join([f"{item['ID']}: {item['name']} - {item['score']}" for item in recommendations["Dinner"]])
         
-        return f"Breakfast Recommendations:\n{breakfast}\n\nLunch Recommendations:\n{lunch}\n\nDinner Recommendations:\n{dinner}"
+        return f"Breakfast:\n{breakfast}\n\nLunch:\n{lunch}\n\nDinner:\n{dinner}"
 
     def roll_out_menu(self, breakfast_ids, lunch_ids, dinner_ids):
         if not self.connection:
             return "Database connection not established"
         
+        cursor = self.connection.cursor()
+        today = datetime.now().strftime("%Y-%m-%d")
+        
         try:
-            cursor = self.connection.cursor()
-
-            # Roll out breakfast menu items
-            self._roll_out_meal(cursor, breakfast_ids, 'Breakfast')
-
-            # Roll out lunch menu items
-            self._roll_out_meal(cursor, lunch_ids, 'Lunch')
-
-            # Roll out dinner menu items
-            self._roll_out_meal(cursor, dinner_ids, 'Dinner')
-
+            for item_id in breakfast_ids + lunch_ids + dinner_ids:
+                cursor.execute("INSERT INTO MenuRollout (menu_id, date) VALUES (?, ?)", item_id, today)
             self.connection.commit()
             return "Menu rolled out successfully"
-
-        except pyodbc.Error as e:
-            print(f"Error in roll_out_menu: {str(e)}")
-            return "Error rolling out menu"
-
-        finally:
-            cursor.close()
-
-    def _roll_out_meal(self, cursor, menu_ids, meal_type):
-        if menu_ids:
-            placeholders = ",".join("?" * len(menu_ids))
-            cursor.execute(f"SELECT ID, name FROM Menu WHERE ID IN ({placeholders})", *menu_ids)
-            result = cursor.fetchall()
-            print(result)
-            test_date = str(datetime.now().date())
-            for row in result:
-                cursor.execute(f"""INSERT INTO Chefmenutable (menu_id, sentdate) VALUES ({row[0]}, '{test_date}')""")
+        except Exception as e:
+            return str(e)
 
     def generate_monthly_report(self):
-        # Placeholder for actual report generation logic
         if self.connection:
-            return "Monthly report generated successfully"
+            cursor = self.connection.cursor()
+            query = """
+            SELECT 
+                DATEPART(month, date) AS Month, 
+                m.name AS MenuItem, 
+                COUNT(mr.menu_id) AS TotalOrders
+            FROM 
+                MenuRollout mr
+                JOIN Menu m ON mr.menu_id = m.ID
+            WHERE 
+                DATEPART(year, date) = DATEPART(year, GETDATE())
+            GROUP BY 
+                DATEPART(month, date), m.name
+            ORDER BY 
+                Month, TotalOrders DESC
+            """
+            cursor.execute(query)
+            result = cursor.fetchall()
+            report = ["Month: {row.Month}, MenuItem: {row.MenuItem}, TotalOrders: {row.TotalOrders}" for row in result]
+            return "\n".join(report)
         else:
             return "Database connection not established"
 
@@ -179,39 +176,39 @@ class DBOperations:
         else:
             return "Database connection not established"
 
-    def give_feedback(self, menu_id, emp_id, comment, rating, date):
+    def employee_voting(self, item_id):
         if self.connection:
-            sentiment_score = SentimentAnalyzer.analyze_sentiment(comment)
-            
+            try:
+                cursor = self.connection.cursor()
+                today_date = str(datetime.now().date())
+                cursor.execute("UPDATE Chefmenutable SET votes = votes + 1 WHERE menu_id = ? AND sentdate = ?", (item_id, today_date))
+                self.connection.commit()
+                return "Vote added successfully"
+            except Exception as e:
+                return f"Error incrementing votes: {e}"
+        else:
+            return "Database connection not established"
+
+
+    def give_feedback(self, menu_id, feedback, rating):
+        if self.connection:
             cursor = self.connection.cursor()
-            cursor.execute("INSERT INTO Feedback (menu_id, Emp_id, comment, rating, date, sentiment_score) VALUES (?, ?, ?, ?, ?, ?)",
-                           menu_id, emp_id, comment, rating, date, sentiment_score)
+            today_date = str(datetime.now().date())
+            cursor.execute("INSERT INTO Feedback (menu_id, feedback, rating, date) VALUES (?, ?, ?, ?)", menu_id, feedback, rating, today_date )
             self.connection.commit()
             return "Feedback submitted successfully"
         else:
             return "Database connection not established"
 
-    def get_item_detail_by_id(self, ids):
-        if not self.connection:
+    def increment_votes(self, menu_ids):
+        if self.connection:
+            cursor = self.connection.cursor()
+            try:
+                for item_id in menu_ids:
+                    cursor.execute("UPDATE Menu SET votes = votes + 1 WHERE ID = ?", item_id)
+                self.connection.commit()
+                return "Votes incremented successfully"
+            except Exception as e:
+                return f"Error incrementing votes: {e}"
+        else:
             return "Database connection not established"
-        
-        cursor = self.connection.cursor()
-        print(ids)
-        cursor.execute(f"""
-        SELECT ID, name, price, availability, type
-        FROM Menu
-        WHERE ID IN ({ids})
-        """)
-        data = cursor.fetchall()
-
-        item_details = []
-        for row in data:
-            item_details.append({
-                'ID': row.ID,
-                'name': row.name,
-                'price': row.price,
-                'availability': row.availability,
-                'type': row.type
-            })
-        
-        return item_details
