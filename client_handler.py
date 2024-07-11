@@ -35,6 +35,7 @@ class ClientHandler(threading.Thread):
             'get_menu_recommendations': self.handle_get_menu_recommendations,
             'roll_out_menu': self.handle_roll_out_menu,
             'generate_monthly_report': self.handle_generate_monthly_report,
+            'discard_menu_list': self.handle_discard_menu_list,
             'tomorrows_menu': self.handle_tomorrows_menu,
             'employee_voting': self.handle_employee_voting,
             'give_feedback': self.handle_give_feedback,
@@ -98,6 +99,9 @@ class ClientHandler(threading.Thread):
             return "Invalid roll out menu parameters: non-integer value"
         except IndexError:
             return "Invalid roll out menu parameters: missing meal categories"
+    
+    def handle_discard_menu_list(self):
+        return self.menu_ops.discard_menu_list()
 
     def handle_generate_monthly_report(self, _):
         return self.menu_ops.generate_monthly_report()
@@ -106,9 +110,11 @@ class ClientHandler(threading.Thread):
         return self.menu_ops.tomorrows_menu()
 
     def handle_employee_voting(self, params):
-        if len(params) == 1:
-            item_id = int(params[0])
-            return self.menu_ops.employee_voting(item_id)
+        print("in voting")
+        if len(params) > 1:
+            print("in if")
+            # item_id = int(params[0])
+            return self.menu_ops.employee_voting(params)
         return "Invalid employee voting parameters"
 
     def handle_give_feedback(self, params):
@@ -120,6 +126,7 @@ class ClientHandler(threading.Thread):
         return "Invalid feedback parameters"
 
     def handle_increment_votes(self, params):
+        print("handle_increment_votes")
         menu_ids = [int(id_str) for id_str in params[0].split(",")]
         response = self.db.increment_votes(menu_ids)
         return response
@@ -131,9 +138,9 @@ class ClientHandler(threading.Thread):
         return self.db.signup(username, password, role)
 
     def login(self, username, password):
-        response, role = self.db.login(username, password)
+        response, role, Emp_id = self.db.login(username, password)
         if response:
-            return f"Login successful, role: {role}"
+            return f"Login successful, role: {role}, Emp_id: {Emp_id}"
         return "Login failed"
 
     def parse_menu_ids(self, menu_ids_str):

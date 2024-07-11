@@ -22,6 +22,9 @@ class MenuOperations:
     def roll_out_menu(self, breakfast_ids, lunch_ids, dinner_ids):
         return self.db.roll_out_menu(breakfast_ids, lunch_ids, dinner_ids)
 
+    def handle_discard_menu_list(self):
+        return self.db.handle_discard_menu_list()
+
     def generate_monthly_report(self):
         return self.db.generate_monthly_report()
 

@@ -29,15 +29,16 @@ def handle_login_response(role_response, s):
     Handles the role response after successful login.
     """
     if role_response.startswith("Login successful, role:"):
-        role = role_response.split(':')[1].strip()
+        print(role_response)
+        reponse = role_response.split(':')[1].strip()        
+        role = reponse.split(',')[0].strip()
+        Emp_id =reponse.split(',')[1].strip()
         if role == 'admin':
             admin_menu_loop(s)
         elif role == 'chef':
             chef_menu_loop(s)
         elif role == 'employee':
             employee_menu_loop(s)
-        else:
-            print(f"Login successful, role: {role}")
     else:
         print("Login failed")
 

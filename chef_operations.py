@@ -82,6 +82,12 @@ def roll_out_menu(sock):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def discard_menu_list(sock):
+    message = "discard_menu_list"
+    send_message(sock, message)
+    response = receive_response(sock)
+    print(response)
+
 def generate_monthly_report(sock):
     message = "generate_monthly_report,"
     send_message(sock, message)
@@ -97,8 +103,10 @@ def chef_menu_loop(sock):
         elif choice == '2':
             roll_out_menu(sock)
         elif choice == '3':
-            generate_monthly_report(sock)
+            discard_menu_list(sock)
         elif choice == '4':
+            generate_monthly_report(sock)
+        elif choice == '5':
             break
         else:
             print("Invalid choice. Please enter 1, 2, 3, or 4.")

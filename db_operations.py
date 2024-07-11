@@ -3,6 +3,8 @@ from sentiment import SentimentAnalyzer
 import pyodbc
 from recommendation_engine import RecommendationSystem
 
+Emp_id = 0
+
 class DBOperations:
     def __init__(self, db_config):
         self.connection = None
@@ -57,10 +59,12 @@ class DBOperations:
     def login(self, username, password):
         if self.connection:
             cursor = self.connection.cursor()
-            cursor.execute("SELECT role FROM Users WHERE name = ? AND password = ?", username, password)
+            cursor.execute("SELECT role, Emp_id FROM Users WHERE name = ? AND password = ?", username, password)
             result = cursor.fetchone()
+            Emp_id=result.Emp_id
+            print(result)
             if result:
-                return True, result.role
+                return True, result.role, result.Emp_id
             else:
                 return False, None
         else:
@@ -108,11 +112,15 @@ class DBOperations:
             return "Database connection not established"
         
         rec_system = RecommendationSystem(self)
-        recommendations = rec_system.get_recommendations(self, 5)  
+        recommendations = rec_system.get_recommendations(self, 5)
+
+        breakfast = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['breakfast']])
+        lunch = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['lunch']])
+        dinner = "\n".join([f"{item['ID']}: {item['name']}" for item in recommendations['dinner']])  
         
-        breakfast = "\n".join([f"{item['ID']}: {item['name']} - {item['score']}" for item in recommendations["Breakfast"]])
-        lunch = "\n".join([f"{item['ID']}: {item['name']} - {item['score']}" for item in recommendations["Lunch"]])
-        dinner = "\n".join([f"{item['ID']}: {item['name']} - {item['score']}" for item in recommendations["Dinner"]])
+        # breakfast = "\n".join([f"{item['ID']}: {item['name']} - {item['score']}" for item in recommendations["breakfast"]])
+        # lunch = "\n".join([f"{item['ID']}: {item['name']} - {item['score']}" for item in recommendations["lunch"]])
+        # dinner = "\n".join([f"{item['ID']}: {item['name']} - {item['score']}" for item in recommendations["dinner"]])
         
         return f"Breakfast:\n{breakfast}\n\nLunch:\n{lunch}\n\nDinner:\n{dinner}"
 
@@ -125,11 +133,22 @@ class DBOperations:
         
         try:
             for item_id in breakfast_ids + lunch_ids + dinner_ids:
-                cursor.execute("INSERT INTO MenuRollout (menu_id, date) VALUES (?, ?)", item_id, today)
+                cursor.execute("INSERT INTO Chefmenutable (menu_id, sentdate) VALUES (?, ?)", item_id, today)
             self.connection.commit()
             return "Menu rolled out successfully"
         except Exception as e:
             return str(e)
+
+    def handle_discard_menu_list(self):
+        if self.connection:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT average rating FROM Feedback group by menu_id where average rating < 2")
+            result = cursor.fetchall()
+            menu_items = [f"ID: {row.ID}, Name: {row.name}, Price: {row.price}, Availability: {row.availability}" for row in result]
+            return "\n".join(menu_items)
+        else:
+            return "Database connection not established"        
+        return
 
     def generate_monthly_report(self):
         if self.connection:
@@ -176,13 +195,18 @@ class DBOperations:
         else:
             return "Database connection not established"
 
-    def employee_voting(self, item_id):
+    def employee_voting(self, item_ids):
         if self.connection:
             try:
-                cursor = self.connection.cursor()
-                today_date = str(datetime.now().date())
-                cursor.execute("UPDATE Chefmenutable SET votes = votes + 1 WHERE menu_id = ? AND sentdate = ?", (item_id, today_date))
-                self.connection.commit()
+                print("hi")            
+                
+                for item_id in item_ids:
+                    item_id=int(item_id)
+                    cursor = self.connection.cursor()
+                    today_date = str(datetime.now().date())
+                    print("item_id==",item_id, today_date)                
+                    cursor.execute("UPDATE Chefmenutable SET votes = votes + 1 WHERE menu_id = ? AND sentdate = ?", (item_id, today_date))
+                    self.connection.commit()
                 return "Vote added successfully"
             except Exception as e:
                 return f"Error incrementing votes: {e}"
@@ -192,9 +216,11 @@ class DBOperations:
 
     def give_feedback(self, menu_id, feedback, rating):
         if self.connection:
+            sentiment_score=SentimentAnalyzer.analyze_sentiment(feedback)
+            print(sentiment_score)
             cursor = self.connection.cursor()
             today_date = str(datetime.now().date())
-            cursor.execute("INSERT INTO Feedback (menu_id, feedback, rating, date) VALUES (?, ?, ?, ?)", menu_id, feedback, rating, today_date )
+            cursor.execute("INSERT INTO Feedback (menu_id, Emp_id, comment, rating, date, sentiment_score) VALUES (?, ?, ?, ?, ?, ?)", menu_id, Emp_id, feedback, rating, today_date, sentiment_score)
             self.connection.commit()
             return "Feedback submitted successfully"
         else:
@@ -210,5 +236,29 @@ class DBOperations:
                 return "Votes incremented successfully"
             except Exception as e:
                 return f"Error incrementing votes: {e}"
+        else:
+            return "Database connection not established"
+        
+    def get_item_detail_by_id(self, ids):
+        if not self.connection:
+            cursor = self.connection.cursor()
+            print(ids)
+            cursor.execute(f"""
+            SELECT ID, name, price, availability, type
+            FROM Menu
+            WHERE ID IN ({ids})
+            """)
+            data = cursor.fetchall()
+
+            item_details = []
+            for row in data:
+                item_details.append({
+                    'ID': row.ID,
+                    'name': row.name,
+                    'price': row.price,
+                    'availability': row.availability,
+                    'type': row.type
+                })
+            return item_details
         else:
             return "Database connection not established"

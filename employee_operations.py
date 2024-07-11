@@ -31,7 +31,7 @@ def employee_voting(sock):
         return
 
     # Incrementing the vote count for the specified menu items
-    message = f"increment_votes,{','.join(map(str, menu_ids))}"
+    message = f"employee_voting,{','.join(map(str, menu_ids))}"
     send_message(sock, message)
     response = receive_response(sock)
     print(f"Server response: {response}")

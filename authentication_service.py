@@ -29,6 +29,7 @@ def login(sock):
 
     try:
         response = sock.recv(1024).decode()
+        print("client")
         print(response)
         return response
     except Exception as e:
