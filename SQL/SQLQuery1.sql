@@ -143,3 +143,155 @@ VALUES
 (4, 1, 6, 4), -- Anita Sharma chooses Paneer Butter Masala for lunch
 (5, 1, 7, 5), -- Vikram Patel chooses Biryani for dinner
 (6, 1, 8, 6); -- Priya Iyer chooses Dal Makhani for dinner
+
+SELECT 
+    COLUMN_NAME, 
+    DATA_TYPE, 
+    CHARACTER_MAXIMUM_LENGTH, 
+    IS_NULLABLE
+FROM 
+    INFORMATION_SCHEMA.COLUMNS
+WHERE 
+ TABLE_NAME = 'Feedback';
+
+
+ -- Alter the table to add the 'type' column as an ENUM
+-- Alter the table to add the 'type' column as a VARCHAR with check constraint
+ALTER TABLE Menu
+ADD type VARCHAR(20)NOT NULL DEFAULT 'lunch'
+CONSTRAINT CK_Menu_Type CHECK (type IN ('breakfast', 'lunch', 'dinner', 'dessert'));
+
+INSERT INTO Menu (name, price, availability, type)
+VALUES
+    ('Eggs Benedict', 10.99, 1, 'breakfast'),
+    ('Caesar Salad', 8.50, 1, 'lunch'),
+    ('Grilled Salmon', 18.99, 1, 'dinner'),
+    ('Chocolate Cake', 6.99, 1, 'dessert'),
+    ('Pancakes', 9.49, 1, 'breakfast'),
+    ('Club Sandwich', 11.75, 1, 'lunch'),
+    ('Filet Mignon', 29.99, 1, 'dinner'),
+    ('Tiramisu', 7.25, 1, 'dessert'),
+    ('Omelette', 8.99, 1, 'breakfast'),
+    ('Caprese Salad', 7.50, 1, 'lunch');
+
+
+INSERT INTO Chefmenutable (menu_id, sentdate)
+VALUES
+-- May 15, 2023
+(27, '2023-05-15'),  -- Eggs Benedict (breakfast)
+(1, '2023-05-15'),   -- Masala Dosa (lunch)
+(6, '2023-05-15'),   -- Chicken Biryani (lunch)
+(33, '2023-05-15'),  -- Filet Mignon (dinner)
+(30, '2023-05-15'),  -- Chocolate Cake (dessert)
+
+-- June 20, 2023
+(31, '2023-06-20'),  -- Pancakes (breakfast)
+(11, '2023-06-20'),  -- Butter Chicken (lunch)
+(14, '2023-06-20'),  -- Mutton Rogan Josh (lunch)
+(29, '2023-06-20'),  -- Grilled Salmon (dinner)
+(34, '2023-06-20'),  -- Tiramisu (dessert)
+
+-- April 10, 2023
+(27, '2023-04-10'),  -- Eggs Benedict (breakfast)
+(12, '2023-04-10'),  -- Fish Curry (lunch)
+(14, '2023-04-10'),  -- Mutton Rogan Josh (lunch)
+(33, '2023-04-10'),  -- Filet Mignon (dinner)
+(34, '2023-04-10'),  -- Tiramisu (dessert)
+
+-- March 25, 2023
+(27, '2023-03-25'),  -- Eggs Benedict (breakfast)
+(7, '2023-03-25'),   -- Paneer Butter Masala (lunch)
+(12, '2023-03-25'),  -- Fish Curry (lunch)
+(29, '2023-03-25'),  -- Grilled Salmon (dinner)
+(30, '2023-03-25'),  -- Chocolate Cake (dessert)
+
+-- May 5, 2023
+(31, '2023-05-05'),  -- Pancakes (breakfast)
+(6, '2023-05-05'),   -- Chicken Biryani (lunch)
+(11, '2023-05-05'),  -- Butter Chicken (lunch)
+(33, '2023-05-05'),  -- Filet Mignon (dinner)
+(34, '2023-05-05'),  -- Tiramisu (dessert)
+
+-- July 2, 2023
+(27, '2023-07-02'),  -- Eggs Benedict (breakfast)
+(5, '2023-07-02'),   -- Upma (lunch)
+(1, '2023-07-02'),   -- Masala Dosa (lunch)
+(29, '2023-07-02'),  -- Grilled Salmon (dinner)
+(30, '2023-07-02'),  -- Chocolate Cake (dessert)
+
+-- August 10, 2023
+(31, '2023-08-10'),  -- Pancakes (breakfast)
+(9, '2023-08-10'),   -- Roti (lunch)
+(1, '2023-08-10'),   -- Masala Dosa (lunch)
+(29, '2023-08-10'),  -- Grilled Salmon (dinner)
+(30, '2023-08-10'),  -- Chocolate Cake (dessert)
+
+-- September 15, 2023
+(27, '2023-09-15'),  -- Eggs Benedict (breakfast)
+(8, '2023-09-15'),   -- Dal Makhani (lunch)
+(9, '2023-09-15'),   -- Roti (lunch)
+(33, '2023-09-15'),  -- Filet Mignon (dinner)
+(34, '2023-09-15'),  -- Tiramisu (dessert)
+
+-- October 20, 2023
+(31, '2023-10-20'),  -- Pancakes (breakfast)
+(7, '2023-10-20'),   -- Paneer Butter Masala (lunch)
+(8, '2023-10-20'),   -- Dal Makhani (lunch)
+(29, '2023-10-20'),  -- Grilled Salmon (dinner)
+(30, '2023-10-20'),  -- Chocolate Cake (dessert)
+
+-- November 12, 2023
+(27, '2023-11-12'),  -- Eggs Benedict (breakfast)
+(10, '2023-11-12'),  -- Vegetable Pulao (lunch)
+(11, '2023-11-12'),  -- Butter Chicken (lunch)
+(33, '2023-11-12'),  -- Filet Mignon (dinner)
+(34, '2023-11-12'),  -- Tiramisu (dessert)
+
+-- December 30, 2023
+(31, '2023-12-30'),  -- Pancakes (breakfast)
+(4, '2023-12-30'),   -- Poha (lunch)
+(10, '2023-12-30'),  -- Vegetable Pulao (lunch)
+(29, '2023-12-30'),  -- Grilled Salmon (dinner)
+(30, '2023-12-30'),  -- Chocolate Cake (dessert)
+
+-- January 5, 2023
+(27, '2023-01-05'),  -- Eggs Benedict (breakfast)
+(13, '2023-01-05'),  -- Chole Bhature (lunch)
+(14, '2023-01-05'),  -- Mutton Rogan Josh (lunch)
+(29, '2023-01-05'),  -- Grilled Salmon (dinner)
+(34, '2023-01-05'),  -- Tiramisu (dessert)
+
+-- February 18, 2023
+(31, '2023-02-18'),  -- Pancakes (breakfast)
+(2, '2023-02-18'),   -- Idli (lunch)
+(16, '2023-02-18'),  -- Samosa (lunch)
+(29, '2023-02-18'),  -- Grilled Salmon (dinner)
+(30, '2023-02-18'),  -- Chocolate Cake (dessert)
+
+-- March 20, 2023
+(27, '2023-03-20'),  -- Eggs Benedict (breakfast)
+(16, '2023-03-20'),  -- Samosa (lunch)
+(17, '2023-03-20'),  -- Pakora (lunch)
+(29, '2023-03-20'),  -- Grilled Salmon (dinner)
+(30, '2023-03-20'),  -- Chocolate Cake (dessert)
+
+-- April 22, 2023
+(31, '2023-04-22'),  -- Pancakes (breakfast)
+(17, '2023-04-22'),  -- Pakora (lunch)
+(18, '2023-04-22'),  -- Pani Puri (lunch)
+(29, '2023-04-22'),  -- Grilled Salmon (dinner)
+(30, '2023-04-22'),  -- Chocolate Cake (dessert)
+
+-- May 30, 2023
+(27, '2023-05-30'),  -- Eggs Benedict (breakfast)
+(18, '2023-05-30'),  -- Pani Puri (lunch)
+(19, '2023-05-30'),  -- Gulab Jamun (lunch)
+(29, '2023-05-30'),  -- Grilled Salmon (dinner)
+(30, '2023-05-30'),  -- Chocolate Cake (dessert)
+
+-- June 2, 2023
+(31, '2023-06-02'),  -- Pancakes (breakfast)
+(19, '2023-06-02'),  -- Gulab Jamun (lunch)
+(20, '2023-06-02'),  -- Jalebi (lunch)
+(29, '2023-06-02'),  -- Grilled Salmon (dinner)
+(30, '2023-06-02');  -- Chocolate Cake (dessert)

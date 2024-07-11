@@ -24,5 +24,6 @@ def chef_menu():
 def employee_menu():
     print("Employee Menu:")
     print("1. Tomorrow's Menu")
-    print("2. Give Feedback")
-    print("3. Logout")
+    print("2. Vote Chefmenu items")
+    print("3. Give Feedback")
+    print("4. Logout")
